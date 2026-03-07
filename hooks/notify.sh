@@ -6,7 +6,7 @@
 # --- 通知サウンド設定 ---
 # 利用可能: Basso, Blow, Bottle, Frog, Funk, Glass, Hero, Morse, Ping, Pop, Purr, Sosumi, Submarine, Tink
 SOUND_NOTIFICATION="Glass"
-SOUND_STOP="Hero"
+SOUND_STOP="Submarine"
 
 INPUT=$(cat)
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name')
