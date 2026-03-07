@@ -28,12 +28,18 @@ claude plugin install notify
 
 ## 通知音の変更
 
-`hooks/notify.sh` の先頭にある変数を編集してください。
+環境変数で通知音を設定できます。`.claude/settings.json` の `env` セクションに追記することでユーザーごとにカスタマイズ可能です。
 
-```bash
-SOUND_NOTIFICATION="Glass"    # Notification イベント時
-SOUND_STOP="Submarine"        # Stop（完了）イベント時
+```json
+{
+  "env": {
+    "CLAUDE_CODE_SOUND_NOTIFICATION": "Glass",
+    "CLAUDE_CODE_SOUND_STOP": "Submarine"
+  }
+}
 ```
+
+環境変数を設定しない場合はデフォルト値（`Glass` / `Submarine`）が使われます。
 
 利用可能なサウンド:
 
