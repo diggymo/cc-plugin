@@ -4,10 +4,10 @@
 # 通知本文にユーザーの最後の指示内容を含める
 
 # --- 通知サウンド設定 ---
-# 環境変数 CLAUDE_SOUND_NOTIFICATION / CLAUDE_SOUND_STOP で上書き可能
+# 環境変数 CLAUDE_CODE_SOUND_NOTIFICATION / CLAUDE_CODE_SOUND_STOP で上書き可能
 # 利用可能: Basso, Blow, Bottle, Frog, Funk, Glass, Hero, Morse, Ping, Pop, Purr, Sosumi, Submarine, Tink
-SOUND_NOTIFICATION="${CLAUDE_SOUND_NOTIFICATION:-Glass}"
-SOUND_STOP="${CLAUDE_SOUND_STOP:-Submarine}"
+SOUND_NOTIFICATION="${CLAUDE_CODE_SOUND_NOTIFICATION:-Glass}"
+SOUND_STOP="${CLAUDE_CODE_SOUND_STOP:-Submarine}"
 
 INPUT=$(cat)
 EVENT=$(echo "$INPUT" | jq -r '.hook_event_name')

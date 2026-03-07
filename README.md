@@ -33,8 +33,8 @@ claude plugin install notify
 ```json
 {
   "env": {
-    "CLAUDE_SOUND_NOTIFICATION": "Glass",
-    "CLAUDE_SOUND_STOP": "Submarine"
+    "CLAUDE_CODE_SOUND_NOTIFICATION": "Glass",
+    "CLAUDE_CODE_SOUND_STOP": "Submarine"
   }
 }
 ```
