@@ -1,0 +1,8 @@
+{
+  "name": "notify",
+  "description": "macOS通知でClaude Codeのイベント（Notification/Stop）を知らせるプラグイン。通知本文にユーザーの最後の指示内容を表示します。",
+  "version": "1.0.0",
+  "author": {
+    "name": "morimorikochan"
+  }
+}

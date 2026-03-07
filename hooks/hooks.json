@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'INPUT=$(cat); SID=$(echo \"$INPUT\" | jq -r \".session_id\"); TYPE=$(echo \"$INPUT\" | jq -r \".notification_type\"); LOGFILE=$(ls ~/.claude/projects/*/$SID.jsonl 2>/dev/null | head -1); PROMPT=\"不明\"; if [ -n \"$LOGFILE\" ]; then PROMPT=$(tail -r \"$LOGFILE\" | grep -m1 '\"type\":\"user\"' | jq -r \"if (.message.content | type) == \\\"string\\\" then .message.content elif (.message.content | type) == \\\"array\\\" then [.message.content[] | select(.type == \\\"text\\\") | .text] | first // \\\"\\\" else \\\"\\\" end\" 2>/dev/null | head -c 100); fi; osascript -e \"display notification \\\"$PROMPT\\\" with title \\\"Claude Code\\\" subtitle \\\"$TYPE\\\" sound name \\\"Glass\\\"\"'",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'INPUT=$(cat); ACTIVE=$(echo \"$INPUT\" | jq -r \".stop_hook_active\"); if [ \"$ACTIVE\" = \"true\" ]; then exit 0; fi; SID=$(echo \"$INPUT\" | jq -r \".session_id\"); LOGFILE=$(ls ~/.claude/projects/*/$SID.jsonl 2>/dev/null | head -1); PROMPT=\"不明\"; if [ -n \"$LOGFILE\" ]; then PROMPT=$(tail -r \"$LOGFILE\" | grep -m1 '\"type\":\"user\"' | jq -r \"if (.message.content | type) == \\\"string\\\" then .message.content elif (.message.content | type) == \\\"array\\\" then [.message.content[] | select(.type == \\\"text\\\") | .text] | first // \\\"\\\" else \\\"\\\" end\" 2>/dev/null | head -c 100); fi; osascript -e \"display notification \\\"$PROMPT\\\" with title \\\"Claude Code 完了\\\" subtitle \\\"応答が完了しました\\\" sound name \\\"Glass\\\"\"'",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
