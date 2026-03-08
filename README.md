@@ -1,49 +1,35 @@
-# claude-notify-plugin
+# cc-plugin
 
-Claude Code の Notification / Stop イベント時に macOS 通知を表示するプラグイン。
-
-通知本文にユーザーの最後の指示内容を表示するので、複数セッション稼働中でもどのタスクが完了したか分かります。
-
-## 機能
-
-- **Notification イベント**: Claude が確認を求めている時に通知
-- **Stop イベント**: Claude の応答完了時に通知
-- イベントごとに通知音を変更可能
-- スキル実行時（`/frontend-design` 等）は展開プロンプトをスキップし、`[meta] {直前の入力}` を表示
-
-## 前提条件
-
-- macOS
-- `jq` がインストール済み（`brew install jq`）
+Claude Code 用プラグイン集。
 
 ## インストール
 
 ```bash
-# 1. マーケットプレイスとしてリポジトリを追加
+# マーケットプレイスとしてリポジトリを追加
 claude plugin marketplace add diggymo/cc-plugin
 
-# 2. プラグインをインストール
+# 使いたいプラグインをインストール
 claude plugin install notify
+claude plugin install grep-sessions
 ```
 
-## 通知音の変更
+## プラグイン一覧
 
-環境変数で通知音を設定できます。`.claude/settings.json` の `env` セクションに追記することでユーザーごとにカスタマイズ可能です。
+### [notify](./plugins/notify/)
 
-```json
-{
-  "env": {
-    "CLAUDE_CODE_SOUND_NOTIFICATION": "Glass",
-    "CLAUDE_CODE_SOUND_STOP": "Submarine"
-  }
-}
-```
+macOS 通知で Claude Code のイベント（Notification / Stop）を知らせるフックプラグイン。
 
-環境変数を設定しない場合はデフォルト値（`Glass` / `Submarine`）が使われます。
+- 応答完了時や確認要求時に macOS 通知を表示
+- 通知本文にユーザーの最後の指示内容を表示（複数セッション稼働中でも識別可能）
+- イベントごとに通知音をカスタマイズ可能
 
-利用可能なサウンド:
+### [grep-sessions](./plugins/grep-sessions/)
 
-`Basso` `Blow` `Bottle` `Frog` `Funk` `Glass` `Hero` `Morse` `Ping` `Pop` `Purr` `Sosumi` `Submarine` `Tink`
+Claude Code の全会話履歴からキーワード検索するスキルプラグイン。
+
+- `/grep-sessions {キーワード}` で過去の会話を横断検索
+- セッション ID ごとにマッチ箇所と直近のユーザー入力を一覧表示
+- プロジェクト指定・件数制限のオプション付き
 
 ## ライセンス
 
