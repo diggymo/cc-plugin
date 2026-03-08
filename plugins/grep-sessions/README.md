@@ -35,7 +35,7 @@ Claude Code 内で以下のように呼び出します:
 
 ## ccs コマンド
 
-ターミナルから直接使いたい場合は、以下の alias を `~/.zshrc` に追加してください:
+以下の alias を `~/.zshrc` に追加してください:
 
 ```sh
 alias ccs='python3 /path/to/plugins/grep-sessions/search.py'
