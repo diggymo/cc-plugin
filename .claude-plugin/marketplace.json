@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "diggymo-cc-plugin",
+  "description": "macOS通知でClaude Codeのイベントを知らせるプラグイン集",
+  "owner": {
+    "name": "morimorikochan"
+  },
+  "plugins": [
+    {
+      "name": "notify",
+      "description": "macOS通知でClaude Codeのイベント（Notification/Stop）を知らせるプラグイン。通知本文にユーザーの最後の指示内容を表示します。",
+      "version": "1.0.0",
+      "author": {
+        "name": "morimorikochan"
+      },
+      "source": "./plugins/notify",
+      "category": "productivity"
+    }
+  ]
+}
