@@ -81,4 +81,6 @@ else
 fi
 
 # macOS通知を表示
-osascript -e "display notification \"$PROMPT\" with title \"$TITLE\" subtitle \"$SUBTITLE\" sound name \"$SOUND\""
+osascript <<EOF
+display notification "$PROMPT" with title "$TITLE" subtitle "$SUBTITLE" sound name "$SOUND"
+EOF
