@@ -42,6 +42,11 @@ Resources:
             - POST
             - PATCH
             - OPTIONS
+          # TODO(security): AllowOrigins: ["*"] は overly permissive。
+          # Lambda Function URL の CORS を APP_URL に限定すること。
+          # ただし APP_URL 自体が !GetAtt で動的に決まるため CFn 組み込みでは
+          # 循環参照になる。解決策: カスタムドメインを Parameter で受け取るか、
+          # 2-stage デプロイ（URL 取得後に再 deploy）で対応する。
           AllowOrigins:
             - "*"
       Environment:
@@ -76,6 +81,8 @@ Resources:
           - POST
           - PATCH
           - OPTIONS
+        # TODO(security): 上記 MarkdownEditorFunction の FunctionUrlConfig と同様。
+        # AllowOrigins を APP_URL 相当の値に絞ること。
         AllowOrigins:
           - "*"
 

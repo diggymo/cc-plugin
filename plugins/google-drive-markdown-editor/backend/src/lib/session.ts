@@ -2,6 +2,8 @@ import { SignJWT, jwtVerify } from "jose";
 
 export interface SessionPayload {
   access_token: string;
+  refresh_token?: string;
+  access_token_expires_at?: number; // Unix ms
   email: string;
   name: string;
 }
@@ -14,7 +16,7 @@ export async function createSession(payload: SessionPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("1h")
+    .setExpirationTime("7d")
     .sign(SECRET);
 }
 

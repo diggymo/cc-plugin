@@ -14,15 +14,32 @@ const SCOPES = [
   "https://www.googleapis.com/auth/drive.file",
 ].join(" ");
 
+const SESSION_MAX_AGE = 7 * 24 * 3600;
+const NONCE_MAX_AGE = 300; // 5 分以内にコールバックが来ること
+
 export const authRoutes = new Hono();
 
 // Google OAuth ログイン開始
 authRoutes.get("/login", (c) => {
+  // CSRF 対策: ランダムな nonce を生成してセッションに紐付ける
+  const nonce = crypto.randomUUID();
+
   // Drive から開かれた時の state パラメータを保持する
-  const driveState = c.req.query("drive_state");
-  const oauthState = driveState
-    ? encodeURIComponent(driveState)
-    : "no_state";
+  const driveStateParam = c.req.query("drive_state") ?? "";
+
+  // state = { nonce, ds: drive_state 文字列 }
+  const oauthState = encodeURIComponent(
+    JSON.stringify({ nonce, ds: driveStateParam })
+  );
+
+  // nonce を httpOnly cookie に保存（コールバックで照合する）
+  setCookie(c, "oauth_nonce", nonce, {
+    httpOnly: true,
+    secure: APP_URL.startsWith("https"),
+    sameSite: "Lax",
+    maxAge: NONCE_MAX_AGE,
+    path: "/",
+  });
 
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
@@ -42,10 +59,32 @@ authRoutes.get("/login", (c) => {
 // Google OAuth コールバック
 authRoutes.get("/callback", async (c) => {
   const code = c.req.query("code");
-  const state = c.req.query("state");
+  const stateParam = c.req.query("state");
 
   if (!code) {
     return c.json({ error: "Missing authorization code" }, 400);
+  }
+
+  // CSRF 検証: state の nonce が Cookie と一致するか確認
+  const nonceCookie = getCookie(c, "oauth_nonce");
+  deleteCookie(c, "oauth_nonce", { path: "/" });
+
+  if (!stateParam || !nonceCookie) {
+    return c.json({ error: "Invalid state" }, 400);
+  }
+
+  let stateObj: { nonce: string; ds: string };
+  try {
+    stateObj = JSON.parse(decodeURIComponent(stateParam)) as {
+      nonce: string;
+      ds: string;
+    };
+  } catch {
+    return c.json({ error: "Invalid state" }, 400);
+  }
+
+  if (stateObj.nonce !== nonceCookie) {
+    return c.json({ error: "State mismatch" }, 400);
   }
 
   // コードをトークンに交換
@@ -65,21 +104,24 @@ authRoutes.get("/callback", async (c) => {
     return c.json({ error: "Failed to exchange token" }, 500);
   }
 
-  const tokens = await tokenRes.json() as {
+  const tokens = (await tokenRes.json()) as {
     access_token: string;
+    refresh_token?: string;
+    expires_in: number;
     id_token: string;
   };
 
   // ユーザー情報を取得
-  const userRes = await fetch(
-    `https://www.googleapis.com/oauth2/v3/userinfo`,
-    { headers: { Authorization: `Bearer ${tokens.access_token}` } }
-  );
-  const user = await userRes.json() as { email: string; name: string };
+  const userRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+    headers: { Authorization: `Bearer ${tokens.access_token}` },
+  });
+  const user = (await userRes.json()) as { email: string; name: string };
 
   // JWT セッションを Cookie に保存
   const sessionToken = await createSession({
     access_token: tokens.access_token,
+    refresh_token: tokens.refresh_token,
+    access_token_expires_at: Date.now() + tokens.expires_in * 1000,
     email: user.email,
     name: user.name,
   });
@@ -88,21 +130,21 @@ authRoutes.get("/callback", async (c) => {
     httpOnly: true,
     secure: APP_URL.startsWith("https"),
     sameSite: "Lax",
-    maxAge: 3600,
+    maxAge: SESSION_MAX_AGE,
     path: "/",
   });
 
   // Drive から来た state があれば、そのファイルを開く
-  if (state && state !== "no_state") {
+  if (stateObj.ds) {
     try {
-      const driveState = JSON.parse(decodeURIComponent(state)) as {
+      const driveState = JSON.parse(decodeURIComponent(stateObj.ds)) as {
         ids?: string[];
       };
       if (driveState.ids?.[0]) {
         return c.redirect(`/editor/${driveState.ids[0]}`);
       }
     } catch {
-      // state のパースに失敗したらトップへ
+      // drive_state のパースに失敗したらトップへ
     }
   }
 
