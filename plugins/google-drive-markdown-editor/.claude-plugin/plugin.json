@@ -1,0 +1,9 @@
+{
+  "name": "google-drive-markdown-editor",
+  "version": "1.0.0",
+  "description": "Google DriveのMarkdownファイルをブラウザで編集できるWebエディタ（リアルタイムプレビュー・自動保存対応）",
+  "type": "webapp",
+  "author": "diggymo",
+  "runtime": "aws-lambda",
+  "stack": ["hono", "react", "codemirror"]
+}

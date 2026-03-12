@@ -1,0 +1,15 @@
+{
+  "name": "google-drive-markdown-editor",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build:frontend": "pnpm --filter frontend build",
+    "build:backend": "pnpm --filter backend build",
+    "build": "pnpm run build:frontend && mkdir -p backend/public && cp -r frontend/dist/. backend/public/ && pnpm run build:backend",
+    "deploy": "pnpm run build && sam deploy --template-file template.yaml --stack-name google-drive-markdown-editor --capabilities CAPABILITY_IAM --resolve-s3 --parameter-overrides GoogleClientId=$GOOGLE_CLIENT_ID GoogleClientSecret=$GOOGLE_CLIENT_SECRET SessionSecret=$SESSION_SECRET",
+    "deploy:guided": "pnpm run build && sam deploy --guided --template-file template.yaml",
+    "typecheck": "pnpm --filter frontend typecheck && pnpm --filter backend typecheck"
+  }
+}

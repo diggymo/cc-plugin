@@ -1,0 +1,9 @@
+node_modules/
+frontend/dist/
+backend/dist/
+backend/public/
+dist/
+.env
+.env.local
+samconfig.toml
+.aws-sam/
