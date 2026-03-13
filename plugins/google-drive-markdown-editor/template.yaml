@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Google Drive Markdown Editor - Hono on Lambda
+
+Parameters:
+  GoogleClientId:
+    Type: String
+    Description: Google OAuth Client ID
+  GoogleClientSecret:
+    Type: String
+    Description: Google OAuth Client Secret
+    NoEcho: true
+  SessionSecret:
+    Type: String
+    Description: JWT session signing secret (run `openssl rand -base64 32`)
+    NoEcho: true
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: nodejs20.x
+    Architectures:
+      - arm64
+
+Resources:
+  MarkdownEditorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: backend/dist/
+      Description: Google Drive Markdown Editor API + SPA
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowCredentials: true
+          AllowHeaders:
+            - content-type
+            - cookie
+          AllowMethods:
+            - GET
+            - POST
+            - PATCH
+            - OPTIONS
+          # TODO(security): AllowOrigins: ["*"] は overly permissive。
+          # Lambda Function URL の CORS を APP_URL に限定すること。
+          # ただし APP_URL 自体が !GetAtt で動的に決まるため CFn 組み込みでは
+          # 循環参照になる。解決策: カスタムドメインを Parameter で受け取るか、
+          # 2-stage デプロイ（URL 取得後に再 deploy）で対応する。
+          AllowOrigins:
+            - "*"
+      Environment:
+        Variables:
+          GOOGLE_CLIENT_ID: !Ref GoogleClientId
+          GOOGLE_CLIENT_SECRET: !Ref GoogleClientSecret
+          SESSION_SECRET: !Ref SessionSecret
+          APP_URL: !GetAtt MarkdownEditorFunctionUrl.FunctionUrl
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: "node20"
+        Sourcemap: false
+        EntryPoints:
+          - src/index.ts
+
+  MarkdownEditorFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt MarkdownEditorFunction.Arn
+      AuthType: NONE
+      Cors:
+        AllowCredentials: true
+        AllowHeaders:
+          - content-type
+          - cookie
+        AllowMethods:
+          - GET
+          - POST
+          - PATCH
+          - OPTIONS
+        # TODO(security): 上記 MarkdownEditorFunction の FunctionUrlConfig と同様。
+        # AllowOrigins を APP_URL 相当の値に絞ること。
+        AllowOrigins:
+          - "*"
+
+  MarkdownEditorFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunctionUrl
+      FunctionName: !Ref MarkdownEditorFunction
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+Outputs:
+  EditorUrl:
+    Description: Markdown Editor URL (Lambda Function URL)
+    Value: !GetAtt MarkdownEditorFunctionUrl.FunctionUrl
+  FunctionName:
+    Description: Lambda Function Name
+    Value: !Ref MarkdownEditorFunction

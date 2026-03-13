@@ -25,6 +25,16 @@
       },
       "source": "./plugins/grep-sessions",
       "category": "productivity"
+    },
+    {
+      "name": "google-drive-markdown-editor",
+      "description": "Google DriveのMarkdownファイルをブラウザで編集できるWebエディタ。リアルタイムプレビュー・自動保存対応。HonoバックエンドをAWS Lambdaにデプロイして使用します。",
+      "version": "1.0.0",
+      "author": {
+        "name": "morimorikochan"
+      },
+      "source": "./plugins/google-drive-markdown-editor",
+      "category": "productivity"
     }
   ]
 }
